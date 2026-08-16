@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planing_Trip AI — Boarding Pass to Your Next Trip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="page-bg">
+    <div class="horizon-glow glow-1"></div>
+    <div class="horizon-glow glow-2"></div>
+    <svg class="flight-path" viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M -50 620 Q 300 480 550 560 T 1250 380" />
+      <path d="M -50 180 Q 350 60 650 220 T 1250 120" />
+    </svg>
+  </div>
+
+  <main class="app-container">
+    <header class="ticket-strip">
+      <div class="stamp-mark">
+        <span>Ready</span>
+        <span>for</span>
+        <span>Takeoff</span>
+      </div>
+      <div class="ticket-eyebrow">
+        <span class="plane-icon" aria-hidden="true">✈</span>
+        Planing_Trip Air &mdash; AI Co-Pilot Class
+      </div>
+      <h1>Plan your perfect trip, gate to gate.</h1>
+      <p>
+        Tell us the trip you're dreaming about. We'll check flights, hotels,
+        weather and budget, then hand you a draft itinerary to review before
+        anything is booked.
+      </p>
+    </header>
+
+    <section class="planner-card boarding-pass">
+      <div class="pass-top">
+        <div class="pass-airline">
+          <span class="plane-icon" aria-hidden="true">✈</span>
+          TripMate&nbsp;Air
+        </div>
+        <div class="status-pill">
+          <span class="status-dot"></span>
+          Gate open
+        </div>
+      </div>
+
+      <div class="pass-body">
+        <div class="pass-main">
+          <span class="pass-label">Passenger request</span>
+          <h2>Where do you want to go?</h2>
+          <p>
+            Example: Plan a complete 7 day Japan trip from Egypt under 100,000 EGP.
+          </p>
+
+          <label class="origin-row" for="originCountry">
+            <span class="origin-label">Traveling from</span>
+            <input
+              id="originCountry"
+              type="text"
+              value="Egypt"
+              autocomplete="off"
+              spellcheck="false"
+            >
+            <span class="origin-hint">default if not mentioned</span>
+          </label>
+
+          <textarea
+            id="userInput"
+            placeholder="Plan a complete 7 days Japan trip including flights, hotels and sightseeing under 100,000 EGP..."
+          ></textarea>
+
+          <div class="quick-prompts">
+            <button onclick="setPrompt('Plan a complete 7 days Japan trip from Egypt including flights, hotels and sightseeing under 100,000 EGP.')">
+              <span class="tag-icon">🏯</span> Japan
+            </button>
+            <button onclick="setPrompt('Plan a 5 days Dubai trip from Egypt with flights, hotels and sightseeing.')">
+              <span class="tag-icon">🏙️</span> Dubai
+            </button>
+            <button onclick="setPrompt('Plan a 7 days Thailand trip from Egypt with budget hotels and sightseeing.')">
+              <span class="tag-icon">🏝️</span> Thailand
+            </button>
+            <button onclick="setPrompt('Plan a 6 days Turkey trip from Egypt with flights, hotels and sightseeing.')">
+              <span class="tag-icon">🕌</span> Turkey
+            </button>
+            <button onclick="setPrompt('Plan a 5 days Maldives trip from Egypt with a beach resort and water activities.')">
+              <span class="tag-icon">🌊</span> Maldives
+            </button>
+            <button onclick="setPrompt('Give me all country flight info.')">
+              <span class="tag-icon">🌍</span> Any destination
+            </button>
+          </div>
+        </div>
+
+        <div class="pass-perforation" aria-hidden="true"></div>
+
+        <div class="pass-stub">
+          <span class="pass-label">Gate action</span>
+          <button id="sendBtn" onclick="sendMessage()">
+            <span id="btnText">Generate Draft</span>
+            <span id="btnLoader" class="loader hidden"></span>
+          </button>
+          <div class="pass-barcode" aria-hidden="true"></div>
+          <span class="pass-hint">Ctrl + Enter to send</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="workflowSection" class="workflow-section hidden">
+      <div class="workflow-header">
+        <div>
+          <span class="eyebrow">Flight path</span>
+          <h2>How your co-pilots got you here</h2>
+        </div>
+        <span id="guardrailBadge" class="guardrail-badge">Guardrail passed</span>
+      </div>
+      <p id="supervisorReasoning" class="supervisor-reasoning"></p>
+      <div id="agentChips" class="agent-chips"></div>
+    </section>
+
+    <section id="resultSection" class="result-section hidden">
+      <div class="result-header">
+        <div>
+          <span class="eyebrow">Itinerary</span>
+          <h2 id="resultTitle">Your AI Travel Plan</h2>
+          <p id="threadInfo" class="ticket-code">Thread ID: -</p>
+        </div>
+        <div class="result-actions">
+          <button class="copy-btn" onclick="copyResult()">Copy</button>
+          <button class="download-btn" onclick="downloadPDF()">Download PDF</button>
+        </div>
+      </div>
+
+      <div id="pdfContent" class="pdf-content postcard">
+        <h1 class="pdf-title">AI Travel Plan</h1>
+        <div id="resultBox" class="result-box"></div>
+      </div>
+    </section>
+
+    <section id="approvalSection" class="approval-section hidden">
+      <div class="approval-icon" aria-hidden="true">🛂</div>
+      <div class="approval-content">
+        <span class="eyebrow">Passport control</span>
+        <h2>Review the draft before it's stamped</h2>
+        <p id="approvalRequest">
+          Approve the draft or provide feedback before the final plan is generated.
+        </p>
+
+        <textarea
+          id="approvalFeedback"
+          class="feedback-input"
+          placeholder="Add revision feedback, for example: reduce the hotel cost and add one free day..."
+        ></textarea>
+
+        <div class="approval-actions">
+          <button id="approveBtn" class="approve-btn" onclick="submitApproval(true)">
+            Stamp &amp; Generate Final
+          </button>
+          <button id="reviseBtn" class="revise-btn" onclick="submitApproval(false)">
+            Send Back for Revision
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="errorBox" class="error-box hidden"></section>
+  </main>
+
+  <footer>
+    Built with FastAPI, LangGraph, Groq, PostgreSQL, Tavily, AviationStack and MCP
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="/static/script.js"></script>
+</body>
+</html>
